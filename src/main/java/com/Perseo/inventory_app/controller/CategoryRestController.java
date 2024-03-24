@@ -5,6 +5,7 @@ import com.Perseo.inventory_app.services.ICategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +18,11 @@ public class CategoryRestController {
     public ResponseEntity<CategoryResponseRest> searchCategory(){
         ResponseEntity<CategoryResponseRest> response = service.search();
         return response;
-
+    }
+    @GetMapping("/categories/{id}")
+    public ResponseEntity<CategoryResponseRest> searchCategoryById(@PathVariable Long id){
+        ResponseEntity<CategoryResponseRest> response = service.searchById(id);
+        return response;
     }
 
 }
