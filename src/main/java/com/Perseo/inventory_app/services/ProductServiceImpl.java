@@ -5,9 +5,11 @@ import com.Perseo.inventory_app.dao.IProductDao;
 import com.Perseo.inventory_app.model.Category;
 import com.Perseo.inventory_app.model.Product;
 import com.Perseo.inventory_app.response.ProductResponseRest;
+import com.Perseo.inventory_app.util.Util;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,7 @@ public class ProductServiceImpl implements IProductService{
     }
 
     @Override
+    @Transactional
     public ResponseEntity<ProductResponseRest> save(Product product, Long categoryId) {
         ProductResponseRest response = new ProductResponseRest();
         List<Product> list = new ArrayList<>();
@@ -57,5 +60,37 @@ public class ProductServiceImpl implements IProductService{
         }
 
         return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ResponseEntity<ProductResponseRest> searchById(Long id) {
+
+        ProductResponseRest response = new ProductResponseRest();
+        List<Product> list = new ArrayList<>();
+
+        try {
+            // Search product by ID
+            Optional<Product> product = productDao.findById(id);
+            if (product.isPresent()){
+                byte[] imagenDescompressed = Util.decompressZLib(product.get().getPicture());
+                product.get().setPicture(imagenDescompressed);
+                list.add(product.get());
+                response.getProduct().setProducts(list);
+                response.setMetadata("Respuesta ok","00","Producto encontrado");
+
+            }else {
+                response.setMetadata("respuesta no ok","-1","Producto no encontrado");
+                return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+            }
+
+        } catch (Exception e){
+            e.getStackTrace();
+            response.setMetadata("respuesta no ok","-1","Error servidor, al guardar producto");
+
+        }
+
+        return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
+
     }
 }
