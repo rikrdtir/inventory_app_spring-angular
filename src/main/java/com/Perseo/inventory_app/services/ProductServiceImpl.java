@@ -86,7 +86,45 @@ public class ProductServiceImpl implements IProductService{
 
         } catch (Exception e){
             e.getStackTrace();
-            response.setMetadata("respuesta no ok","-1","Error servidor, al guardar producto");
+            response.setMetadata("respuesta no ok","-1","Error al guardar producto");
+
+        }
+
+        return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ResponseEntity<ProductResponseRest> searchByName(String name) {
+
+        ProductResponseRest response = new ProductResponseRest();
+        List<Product> list = new ArrayList<>();
+        List<Product> listAux = new ArrayList<>();
+
+        try {
+            // Search product by name
+            listAux = productDao.findByNameLike(name);
+
+            if (listAux.size() > 0){
+                listAux.stream().forEach((p) -> {
+                    //byte[] imagenDescompressed = Util.decompressZLib(p.getPicture());
+                    //p.setPicture(imagenDescompressed);
+                    list.add(p);
+
+                });
+
+                response.getProduct().setProducts(list);
+                response.setMetadata("Respuesta ok","00","Productos encontrado");
+
+            }else {
+                response.setMetadata("respuesta no ok","-1","Productos no encontrados");
+                return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+            }
+
+        } catch (Exception e){
+            e.getStackTrace();
+            response.setMetadata("respuesta no ok","-1","Error al buscar productos por nombre");
 
         }
 
