@@ -10,6 +10,7 @@ public interface IProductService {
     public ResponseEntity<ProductResponseRest> searchByName(String name);
     public ResponseEntity<ProductResponseRest>  delteById(Long id);
     public ResponseEntity<ProductResponseRest>  getAll();
+    public ResponseEntity<ProductResponseRest>  update(Product product,Long id, Long categoryId);
 
 
 }

@@ -4,7 +4,6 @@ import com.Perseo.inventory_app.dao.ICategoryDao;
 import com.Perseo.inventory_app.dao.IProductDao;
 import com.Perseo.inventory_app.model.Category;
 import com.Perseo.inventory_app.model.Product;
-import com.Perseo.inventory_app.response.CategoryResponseRest;
 import com.Perseo.inventory_app.response.ProductResponseRest;
 import com.Perseo.inventory_app.util.Util;
 import org.springframework.http.HttpStatus;
@@ -56,7 +55,7 @@ public class ProductServiceImpl implements IProductService{
 
         } catch (Exception e){
             e.getStackTrace();
-            response.setMetadata("respuesta no ok","-1","Error servidor, al guardar producto");
+            response.setMetadata("respuesta no ok","-1","Error inesperado al guardar producto");
 
         }
 
@@ -168,6 +167,64 @@ public class ProductServiceImpl implements IProductService{
         } catch (Exception e){
             e.getStackTrace();
             response.setMetadata("respuesta no ok","-1","Error al encontrar productos");
+
+        }
+
+        return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
+
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<ProductResponseRest> update(Product product, Long id, Long categoryId) {
+
+        ProductResponseRest response = new ProductResponseRest();
+        List<Product> list = new ArrayList<>();
+
+        try {
+            // Find Category to set ID in product
+            Optional<Category> category = categoryDao.findById(categoryId);
+            if (category.isPresent()){
+                product.setCategory(category.get());
+            }else {
+                response.setMetadata("respuesta no ok","-1","No existe una categoría asociada al producto");
+                return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+            }
+            // Find product by id in db
+            Optional<Product> productFind= productDao.findById(id);
+            if (productFind.isPresent()){
+
+                // Update new sets to product
+                productFind.get().setName(product.getName());
+                productFind.get().setPrice(product.getPrice());
+                productFind.get().setAccount(product.getAccount());
+                productFind.get().setCategory(product.getCategory());
+                productFind.get().setPicture(product.getPicture());
+
+                // Update product in db
+                Product productToUpdate = productDao.save(productFind.get());
+
+                if (productToUpdate != null){
+                    list.add(productToUpdate);
+                    response.getProduct().setProducts(list);
+
+                    response.setMetadata("Respuesta ok","00", "Producto actualizado correctamente");
+
+                } else {
+                    response.setMetadata("respuesta no ok","-1","No se ha podido actualizar este producto");
+                    return new ResponseEntity<ProductResponseRest>(response, HttpStatus.BAD_REQUEST);
+
+                }
+
+            } else {
+                response.setMetadata("respuesta no ok","-1","No se ha podido actualizar este producto");
+                return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+            }
+
+        } catch (Exception e){
+            e.getStackTrace();
+            response.setMetadata("respuesta no ok","-1","Error inesperado al actualizar producto");
+            return new ResponseEntity<ProductResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
 
