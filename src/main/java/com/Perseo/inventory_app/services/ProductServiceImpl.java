@@ -4,6 +4,7 @@ import com.Perseo.inventory_app.dao.ICategoryDao;
 import com.Perseo.inventory_app.dao.IProductDao;
 import com.Perseo.inventory_app.model.Category;
 import com.Perseo.inventory_app.model.Product;
+import com.Perseo.inventory_app.response.CategoryResponseRest;
 import com.Perseo.inventory_app.response.ProductResponseRest;
 import com.Perseo.inventory_app.util.Util;
 import org.springframework.http.HttpStatus;
@@ -151,5 +152,26 @@ public class ProductServiceImpl implements IProductService{
         }
 
         return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ProductResponseRest> getAll() {
+
+        ProductResponseRest response = new ProductResponseRest();
+
+        try {
+            // Get all product
+            List<Product> products= (List<Product>) productDao.findAll();
+            response.getProduct().setProducts(products);
+            response.setMetadata("Respuesta ok", "00", "Respuesta exitosa");
+
+        } catch (Exception e){
+            e.getStackTrace();
+            response.setMetadata("respuesta no ok","-1","Error al encontrar productos");
+
+        }
+
+        return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
+
     }
 }

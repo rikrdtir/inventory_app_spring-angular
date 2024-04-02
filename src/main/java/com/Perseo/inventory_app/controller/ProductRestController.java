@@ -65,5 +65,13 @@ public class ProductRestController {
         ResponseEntity<ProductResponseRest> response = productService.delteById(id);
         return response;
     }
+    /**
+     * Get all
+     */
+    @GetMapping("/products")
+    public ResponseEntity<ProductResponseRest> getAllProducts(){
+        ResponseEntity<ProductResponseRest> response = productService.getAll();
+        return response;
+    }
 
 }
